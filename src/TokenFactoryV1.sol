@@ -43,8 +43,6 @@ contract TokenFactoryV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         uint totalSupply,
         uint perMint
     ) public onlyOwner {
-        console.log("deployInscription msg.sender: ", msg.sender);
-
         // 部署实现
         ERC20Token implementation = new ERC20Token();
         // Deploy the proxy and initialize the contract through the proxy

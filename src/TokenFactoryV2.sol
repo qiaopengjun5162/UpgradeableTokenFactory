@@ -14,7 +14,6 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     ERC20Token myToken;
     ERC1967Proxy proxy;
     address[] public deployedTokens;
-    address public implementation;
     mapping(address => uint) public tokenPrices;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -22,18 +21,9 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         _disableInitializers();
     }
 
-    function initialize(
-        address initialOwner,
-        address _implementation
-    ) public initializer {
+    function initialize(address initialOwner) public initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
-        require(
-            _implementation != address(0),
-            "Invalid implementation address"
-        );
-
-        implementation = _implementation;
     }
 
     function _authorizeUpgrade(
@@ -45,17 +35,19 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @param symbol symbol 表示 Token 的名称
      * @param totalSupply totalSupply 表示可发行的数量
      * @param perMint perMint 用来控制每次发行的数量，用于控制mintInscription函数每次发行的数量
-     * @param _price 每个代币的价格 price 表示发行每个 token 需要支付的费用
+     * @param price 每个代币的价格 price 表示发行每个 token 需要支付的费用
      */
     function deployInscription(
         string memory symbol,
         uint totalSupply,
         uint perMint,
-        uint _price
+        uint price
     ) public onlyOwner {
+        // 部署实现
+        ERC20Token implementation = new ERC20Token();
         console.log("deployInscription  msg.sender, address:", msg.sender);
         // 使用 Clones 库创建最小代理合约实例
-        address proxyInstance = Clones.clone(implementation);
+        address proxyInstance = Clones.clone(address(implementation));
         ERC20Token(proxyInstance).initialize(
             msg.sender,
             symbol,
@@ -64,7 +56,7 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         );
 
         deployedTokens.push(proxyInstance);
-        tokenPrices[proxyInstance] = _price;
+        tokenPrices[proxyInstance] = price;
     }
 
     /**

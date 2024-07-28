@@ -1,0 +1,45 @@
+No files changed, compilation skipped
+
+Ran 1 test for test/ERC20TokenTest.sol:ERC20TokenTest
+[PASS] testERC20Functionality() (gas: 123304)
+Logs:
+  0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.44ms (56.58µs CPU time)
+
+Ran 2 tests for test/TokenFactoryV2Test.sol:CounterTest
+[PASS] testTokenFactoryV2DeployInscriptionFunctionality() (gas: 2905306)
+Logs:
+  0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
+  deployInscription  msg.sender, address: 0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
+
+[PASS] testTokenFactoryV2MintInscriptionFunctionality() (gas: 3005234)
+Logs:
+  0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
+  deployInscription  msg.sender, address: 0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
+
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1.68ms (623.29µs CPU time)
+
+Ran 2 tests for test/Counter.t.sol:CounterTest
+[PASS] testFuzz_SetNumber(uint256) (runs: 256, μ: 31210, ~: 31288)
+[PASS] test_Increment() (gas: 31303)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 4.89ms (3.99ms CPU time)
+
+Ran 3 tests for test/TokenFactoryV1Test.sol:TokenFactoryV1Test
+[PASS] testTokenFactoryV1DeployInscriptionFunctionality() (gas: 2975098)
+Logs:
+  0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
+  deployInscription newToken:  0x8d2C17FAd02B7bb64139109c6533b7C2b9CADb81
+
+[PASS] testTokenFactoryV1MintInscriptionFunctionality() (gas: 3070219)
+Logs:
+  0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
+  deployInscription newToken:  0x8d2C17FAd02B7bb64139109c6533b7C2b9CADb81
+
+[PASS] testUpgradeability() (gas: 6348189)
+Logs:
+  0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
+
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 6.49s (6.49s CPU time)
+
+Ran 4 test suites in 6.50s (6.50s CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)

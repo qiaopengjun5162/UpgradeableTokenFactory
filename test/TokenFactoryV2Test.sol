@@ -21,33 +21,15 @@ contract CounterTest is Test {
     uint public price = 10 ** 16; // 0.01 ETH in wei
 
     function setUp() public {
-        // vm.startPrank(owner.addr);
-        // 部署实现
-        ERC20Token implementation = new ERC20Token();
-        // Deploy the proxy and initialize the contract through the proxy
-        proxy = new ERC1967Proxy(
-            address(implementation),
-            abi.encodeCall(
-                implementation.initialize,
-                (owner.addr, symbol, totalSupply, perMint)
-            )
-        );
-        // 用代理关联 MyToken 接口
-        myToken = ERC20Token(address(proxy));
-
         TokenFactoryV2 implementationV2 = new TokenFactoryV2();
-        proxy2 = new ERC1967Proxy(
+        proxy = new ERC1967Proxy(
             address(implementationV2),
-            abi.encodeCall(
-                implementationV2.initialize,
-                (owner.addr, address(myToken))
-            )
+            abi.encodeCall(implementationV2.initialize, (owner.addr))
         );
         // 用代理关联 TokenFactoryV2 接口
-        factoryv2 = TokenFactoryV2(address(proxy2));
+        factoryv2 = TokenFactoryV2(address(proxy));
         // Emit the owner address for debugging purposes
         emit log_address(owner.addr);
-        // vm.stopPrank();
     }
 
     function testTokenFactoryV2DeployInscriptionFunctionality() public {
@@ -61,17 +43,15 @@ contract CounterTest is Test {
         assertEq(factoryv2.tokenPrices(deployedTokenAddress), price);
         // Create an instance of the deployed token contract
         ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
-        console.log("Deployed token address:", deployedTokenAddress);
-        console.log("Deployed token:", address(deployedToken));
         assertEq(address(deployedToken), deployedTokenAddress);
         // Verify token initialization
-        // assertEq(deployedToken.symbol(), symbol);
-        // assertEq(deployedToken.balanceOf(owner.addr), 0);
-        // assertEq(deployedToken.totalSupplyToken(), totalSupply);
-        // assertEq(deployedToken.perMint(), perMint);
+        assertEq(deployedToken.symbol(), symbol);
+        assertEq(deployedToken.balanceOf(owner.addr), 0);
+        assertEq(deployedToken.totalSupplyToken(), totalSupply);
+        assertEq(deployedToken.perMint(), perMint);
 
-        // // Optionally verify owner initialization
-        // assertEq(deployedToken.owner(), owner.addr);
+        // Optionally verify owner initialization
+        assertEq(deployedToken.owner(), owner.addr);
         vm.stopPrank();
     }
 
@@ -82,14 +62,14 @@ contract CounterTest is Test {
         assertEq(factoryv2.size(), 1);
         // Fetch the deployed token address
         address deployedTokenAddress = factoryv2.deployedTokens(0);
-        // ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
+        ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
         vm.startPrank(user.addr);
         vm.deal(user.addr, 1 ether);
         factoryv2.mintInscription{value: price}(deployedTokenAddress);
-        // assertEq(deployedToken.balanceOf(user.addr), 10 ether);
-        // assertEq(deployedToken.totalSupply(), 10 ether);
-        // // Verify the total supply token
-        // assertEq(deployedToken.totalSupplyToken(), totalSupply);
+        assertEq(deployedToken.balanceOf(user.addr), 10 ether);
+        assertEq(deployedToken.totalSupply(), 10 ether);
+        // Verify the total supply token
+        assertEq(deployedToken.totalSupplyToken(), totalSupply);
         vm.stopPrank();
     }
 }
