@@ -26,7 +26,7 @@ contract ERC20TokenV2Test is Test {
             address(implementation),
             abi.encodeCall(
                 implementation.initialize,
-                (symbol, totalSupply, perMint, price)
+                (owner.addr, symbol, totalSupply, perMint, price)
             )
         );
         // 用代理关联 MyToken 接口

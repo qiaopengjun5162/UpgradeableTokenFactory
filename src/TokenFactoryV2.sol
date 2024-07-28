@@ -5,11 +5,16 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
+import "./ERC20Token.sol";
 import "./ERC20TokenV2.sol";
 
 contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
-    address public implementation;
+    ERC20Token myToken;
+    ERC1967Proxy proxy;
     address[] public deployedTokens;
+    address public implementation;
     mapping(address => uint) public tokenPrices;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -23,6 +28,11 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     ) public initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
+        require(
+            _implementation != address(0),
+            "Invalid implementation address"
+        );
+
         implementation = _implementation;
     }
 
@@ -43,12 +53,19 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         uint perMint,
         uint price
     ) public onlyOwner {
+        console.log("deployInscription  msg.sender, address:", msg.sender);
         // 使用 Clones 库创建最小代理合约实例
-        address proxy = Clones.clone(implementation);
-        ERC20TokenV2(proxy).initialize(symbol, totalSupply, perMint, price);
+        address proxyInstance = Clones.clone(implementation);
+        ERC20TokenV2(proxyInstance).initialize(
+            msg.sender,
+            symbol,
+            totalSupply,
+            perMint,
+            price
+        );
 
-        deployedTokens.push(proxy);
-        tokenPrices[proxy] = price;
+        deployedTokens.push(proxyInstance);
+        tokenPrices[proxyInstance] = price;
     }
 
     /**
@@ -60,5 +77,9 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         uint price = tokenPrices[tokenAddr];
         require(msg.value == price, "Incorrect payment");
         token.mint(msg.sender);
+    }
+
+    function size() public view returns (uint) {
+        return deployedTokens.length;
     }
 }

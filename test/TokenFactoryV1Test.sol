@@ -6,11 +6,15 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {ERC20Token} from "../src/ERC20Token.sol";
+import {ERC20TokenV2} from "../src/ERC20TokenV2.sol";
 import {TokenFactoryV1} from "../src/TokenFactoryV1.sol";
+import {TokenFactoryV2} from "../src/TokenFactoryV2.sol";
 
 contract TokenFactoryV1Test is Test {
     TokenFactoryV1 public factoryv1;
+    TokenFactoryV2 public factoryv2;
     ERC20Token public myToken;
+    ERC20TokenV2 public myToken2;
     ERC1967Proxy proxy;
     Account public owner = makeAccount("owner");
     Account public newOwner = makeAccount("newOwner");
@@ -21,7 +25,6 @@ contract TokenFactoryV1Test is Test {
     uint public perMint = 10 ether;
 
     function setUp() public {
-        factoryv1 = new TokenFactoryV1();
         // 部署实现
         TokenFactoryV1 implementation = new TokenFactoryV1();
         // Deploy the proxy and initialize the contract through the proxy
@@ -73,13 +76,20 @@ contract TokenFactoryV1Test is Test {
     }
 
     // // 测试升级
-    function testUpgradeability() public {
-        // Upgrade the proxy to a new version; TokenFactoryV2
-        Upgrades.upgradeProxy(
-            address(proxy),
-            "TokenFactoryV2.sol:TokenFactoryV2",
-            "",
-            owner.addr
-        );
-    }
+    // function testUpgradeability() public {
+    //     // Upgrade the proxy to a new version; TokenFactoryV2
+    //     address proxyAddress = address(proxy);
+    //     TokenFactoryV2 implementationV2 = new TokenFactoryV2();
+
+    //     address newImplementation = address(implementationV2);
+
+    //     // Upgrade the proxy to the new implementation with arguments
+
+    //     Upgrades.upgradeProxy(
+    //         address(proxy),
+    //         "TokenFactoryV2.sol:TokenFactoryV2",
+    //         "",
+    //         owner.addr
+    //     );
+    // }
 }

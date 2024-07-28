@@ -32,6 +32,7 @@ contract ERC20TokenV2 is
     }
 
     function initialize(
+        address initialOwner,
         string memory _symbol,
         uint _totalSupply,
         uint _perMint,
@@ -41,7 +42,7 @@ contract ERC20TokenV2 is
         __ERC20_init("ERC20Token", _symbol);
         __ERC20Burnable_init();
         __ERC20Pausable_init();
-        __Ownable_init(msg.sender);
+        __Ownable_init(initialOwner);
         __ERC20Permit_init("ERC20Token");
         __ERC20Votes_init();
         __UUPSUpgradeable_init();
