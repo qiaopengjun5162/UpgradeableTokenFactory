@@ -42,15 +42,4 @@ contract ERC20TokenTest is Test {
         myToken.mint(user.addr);
         assertEq(myToken.balanceOf(user.addr), 10 ether);
     }
-
-    // 测试升级
-    function testUpgradeability() public {
-        // Upgrade the proxy to a new version; ERC20TokenV2
-        Upgrades.upgradeProxy(
-            address(proxy),
-            "ERC20TokenV2.sol:ERC20TokenV2",
-            "",
-            owner.addr
-        );
-    }
 }

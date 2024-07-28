@@ -5,11 +5,11 @@ import {Test, console} from "forge-std/Test.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
 import {TokenFactoryV2} from "../src/TokenFactoryV2.sol";
-import {ERC20TokenV2} from "../src/ERC20TokenV2.sol";
+import {ERC20Token} from "../src/ERC20Token.sol";
 
 contract CounterTest is Test {
     TokenFactoryV2 public factoryv2;
-    ERC20TokenV2 public myToken2;
+    ERC20Token public myToken;
     ERC1967Proxy proxy;
     ERC1967Proxy proxy2;
     Account public owner = makeAccount("owner");
@@ -23,24 +23,24 @@ contract CounterTest is Test {
     function setUp() public {
         // vm.startPrank(owner.addr);
         // 部署实现
-        ERC20TokenV2 implementation = new ERC20TokenV2();
+        ERC20Token implementation = new ERC20Token();
         // Deploy the proxy and initialize the contract through the proxy
         proxy = new ERC1967Proxy(
             address(implementation),
             abi.encodeCall(
                 implementation.initialize,
-                (owner.addr, symbol, totalSupply, perMint, price)
+                (owner.addr, symbol, totalSupply, perMint)
             )
         );
         // 用代理关联 MyToken 接口
-        myToken2 = ERC20TokenV2(address(proxy));
+        myToken = ERC20Token(address(proxy));
 
         TokenFactoryV2 implementationV2 = new TokenFactoryV2();
         proxy2 = new ERC1967Proxy(
             address(implementationV2),
             abi.encodeCall(
                 implementationV2.initialize,
-                (owner.addr, address(myToken2))
+                (owner.addr, address(myToken))
             )
         );
         // 用代理关联 TokenFactoryV2 接口
@@ -60,7 +60,7 @@ contract CounterTest is Test {
         address deployedTokenAddress = factoryv2.deployedTokens(0);
         assertEq(factoryv2.tokenPrices(deployedTokenAddress), price);
         // Create an instance of the deployed token contract
-        ERC20TokenV2 deployedToken = ERC20TokenV2(deployedTokenAddress);
+        ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
         console.log("Deployed token address:", deployedTokenAddress);
         console.log("Deployed token:", address(deployedToken));
         assertEq(address(deployedToken), deployedTokenAddress);
@@ -82,7 +82,7 @@ contract CounterTest is Test {
         assertEq(factoryv2.size(), 1);
         // Fetch the deployed token address
         address deployedTokenAddress = factoryv2.deployedTokens(0);
-        ERC20TokenV2 deployedToken = ERC20TokenV2(deployedTokenAddress);
+        // ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
         vm.startPrank(user.addr);
         vm.deal(user.addr, 1 ether);
         factoryv2.mintInscription{value: price}(deployedTokenAddress);

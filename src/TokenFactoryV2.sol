@@ -8,8 +8,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
 import "./ERC20Token.sol";
-import "./ERC20TokenV2.sol";
 
+/// @custom:oz-upgrades-from TokenFactoryV1
 contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     ERC20Token myToken;
     ERC1967Proxy proxy;
@@ -45,27 +45,26 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @param symbol symbol 表示 Token 的名称
      * @param totalSupply totalSupply 表示可发行的数量
      * @param perMint perMint 用来控制每次发行的数量，用于控制mintInscription函数每次发行的数量
-     * @param price 每个代币的价格 price 表示发行每个 token 需要支付的费用
+     * @param _price 每个代币的价格 price 表示发行每个 token 需要支付的费用
      */
     function deployInscription(
         string memory symbol,
         uint totalSupply,
         uint perMint,
-        uint price
+        uint _price
     ) public onlyOwner {
         console.log("deployInscription  msg.sender, address:", msg.sender);
         // 使用 Clones 库创建最小代理合约实例
         address proxyInstance = Clones.clone(implementation);
-        ERC20TokenV2(proxyInstance).initialize(
+        ERC20Token(proxyInstance).initialize(
             msg.sender,
             symbol,
             totalSupply,
-            perMint,
-            price
+            perMint
         );
 
         deployedTokens.push(proxyInstance);
-        tokenPrices[proxyInstance] = price;
+        tokenPrices[proxyInstance] = _price;
     }
 
     /**
@@ -73,7 +72,7 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @param tokenAddr 代币地址
      */
     function mintInscription(address tokenAddr) public payable {
-        ERC20TokenV2 token = ERC20TokenV2(tokenAddr);
+        ERC20Token token = ERC20Token(tokenAddr);
         uint price = tokenPrices[tokenAddr];
         require(msg.value >= price, "Incorrect payment");
         token.mint(msg.sender);
