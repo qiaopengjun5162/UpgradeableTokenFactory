@@ -75,7 +75,7 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     function mintInscription(address tokenAddr) public payable {
         ERC20TokenV2 token = ERC20TokenV2(tokenAddr);
         uint price = tokenPrices[tokenAddr];
-        require(msg.value == price, "Incorrect payment");
+        require(msg.value >= price, "Incorrect payment");
         token.mint(msg.sender);
     }
 
