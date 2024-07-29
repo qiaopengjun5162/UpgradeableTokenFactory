@@ -13,9 +13,22 @@ import "./ERC20Token.sol";
 /// @custom:oz-upgrades-from TokenFactoryV1
 contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     ERC20Token myToken;
-    ERC1967Proxy proxy;
     address[] public deployedTokens;
     mapping(address => uint) public tokenPrices;
+    mapping(address => uint) public tokenperMint;
+    mapping(address => address) public tokenDeployUser;
+
+    event deployInscriptionEvent(
+        address indexed tokenAddress,
+        address indexed userAddress,
+        uint indexed price
+    );
+
+    event mintInscriptionEvent(
+        address indexed tokenAddress,
+        address indexed userAddress,
+        uint indexed amount
+    );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -48,19 +61,19 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         uint perMint,
         uint price
     ) public {
-        // require(
-        //     implementation != address(0),
-        //     "Implementation address is not set"
-        // );
+        require(bytes(symbol).length > 0, "Symbol cannot be empty");
+        require(totalSupply > 0, "Total supply must be greater than zero");
+        require(perMint > 0, "Per mint must be greater than zero");
+        require(price > 0, "Price must be greater than zero");
 
-        // 部署实现
-        // ERC20Token implementation = new ERC20Token();
+        require(
+            address(myToken) != address(0),
+            "Implementation address is not set"
+        );
 
         console.log("deployInscription  msg.sender, address:", msg.sender);
         // 使用 Clones 库创建最小代理合约实例
-        // address proxyInstance = Clones.clone(address(implementation));
         address newToken = Clones.clone(address(myToken));
-        // address proxyInstance = createClone(implementation);
 
         ERC20Token(newToken).initialize(
             msg.sender,
@@ -71,6 +84,9 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
         deployedTokens.push(newToken);
         tokenPrices[newToken] = price;
+        tokenperMint[newToken] = perMint;
+        tokenDeployUser[newToken] = msg.sender;
+        emit deployInscriptionEvent(newToken, msg.sender, price);
     }
 
     /**
@@ -80,10 +96,15 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     function mintInscription(address tokenAddr) public payable {
         ERC20Token token = ERC20Token(tokenAddr);
         uint price = tokenPrices[tokenAddr];
-        require(msg.value >= price, "Incorrect payment");
+        uint perMint = tokenperMint[tokenAddr];
+        address userAddr = tokenDeployUser[tokenAddr];
+        require(msg.value >= (price * perMint), "Incorrect payment");
         token.mint(msg.sender);
-        // 将支付的以太币转账到合约所有者
-        payable(owner()).transfer(msg.value);
+        // 使用 call 方法转账，以避免 gas 限制问题 payable(userAddr).transfer(msg.value);
+        (bool success, ) = userAddr.call{value: msg.value}("");
+        require(success, "Transfer failed.");
+
+        emit mintInscriptionEvent(tokenAddr, userAddr, msg.value);
     }
 
     /**

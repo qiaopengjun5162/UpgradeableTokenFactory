@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.20;
 
 import {Script, console} from "forge-std/Script.sol";
 import {TokenFactoryV1} from "../src/TokenFactoryV1.sol";
 
-contract CounterScript is Script {
+contract TokenFactoryV1Script is Script {
     TokenFactoryV1 public factoryv1;
 
     function setUp() public {}

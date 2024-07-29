@@ -150,7 +150,7 @@ contract TokenFactoryV1Test is Test {
         vm.prank(owner.addr);
         // TokenFactoryV2 factoryV2 = new TokenFactoryV2();
         assertEq(deployedToken.balanceOf(user.addr), perMint); ///
-        // 升级代理合约
+        // 1. 升级代理合约
         Upgrades.upgradeProxy(
             address(proxy),
             "TokenFactoryV2.sol:TokenFactoryV2",
@@ -170,8 +170,9 @@ contract TokenFactoryV1Test is Test {
         require(s);
 
         // 验证新的功能
+        // 2. deployInscription
         vm.startPrank(user.addr);
-        deal(user.addr, price);
+        deal(user.addr, price * perMint);
         (bool success, ) = address(proxy).call(
             abi.encodeWithSelector(
                 factoryv2.deployInscription.selector,
@@ -212,9 +213,9 @@ contract TokenFactoryV1Test is Test {
         );
 
         assertNotEq(deployedTokenAddress, deployedTokenAddress2);
-
+        // 3. mintInscription
         deployedToken = ERC20Token(deployedTokenAddress2);
-        (bool mintSuccess, ) = address(proxy).call{value: price}(
+        (bool mintSuccess, ) = address(proxy).call{value: price * perMint}(
             abi.encodeWithSignature(
                 "mintInscription(address)",
                 deployedTokenAddress2
@@ -224,6 +225,7 @@ contract TokenFactoryV1Test is Test {
 
         assertEq(factoryv2.tokenPrices(deployedTokenAddress), 0);
         assertEq(factoryv2.tokenPrices(deployedTokenAddress2), price);
+        assertEq(factoryv2.tokenperMint(deployedTokenAddress2), perMint);
 
         assertEq(deployedToken.balanceOf(user.addr), 10 ether);
         assertEq(deployedToken.totalSupply(), perMint);

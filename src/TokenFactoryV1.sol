@@ -11,7 +11,6 @@ import "./ERC20Token.sol";
 
 contract TokenFactoryV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     ERC20Token myToken;
-    ERC1967Proxy proxy;
     address[] public deployedTokens;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -43,18 +42,6 @@ contract TokenFactoryV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         uint totalSupply,
         uint perMint
     ) public {
-        // 部署实现
-        // ERC20Token implementation = new ERC20Token();
-        // // Deploy the proxy and initialize the contract through the proxy
-        // proxy = new ERC1967Proxy(
-        //     address(implementation),
-        //     abi.encodeCall(
-        //         implementation.initialize,
-        //         (msg.sender, symbol, totalSupply, perMint)
-        //     )
-        // );
-        // // 用代理关联 MyToken 接口
-        // myToken = ERC20Token(address(proxy));
         myToken = new ERC20Token();
         myToken.initialize(msg.sender, symbol, totalSupply, perMint);
         console.log("deployInscription newToken: ", address(myToken));

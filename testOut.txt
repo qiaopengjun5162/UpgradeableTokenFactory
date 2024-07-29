@@ -5,61 +5,75 @@ Ran 1 test for test/ERC20TokenTest.sol:ERC20TokenTest
 Logs:
   0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
 
-Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.46ms (64.75µs CPU time)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.40ms (52.42µs CPU time)
 
 Ran 4 tests for test/TokenFactoryV2Test.sol:CounterTest
-[PASS] testTokenFactoryV2DeployInscriptionFunctionality() (gas: 2903155)
+[PASS] testTokenFactoryV2DeployInscriptionFunctionality() (gas: 397403)
 Logs:
   0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
   deployInscription  msg.sender, address: 0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
 
-[PASS] testTokenFactoryV2MintInscriptionFunctionality() (gas: 3002961)
+[PASS] testTokenFactoryV2MintInscriptionFunctionality() (gas: 509552)
 Logs:
   0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
   deployInscription  msg.sender, address: 0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
 
-[PASS] testTokenFactoryV2PermissionsDeployInscriptionFunctionality() (gas: 2905067)
+[PASS] testTokenFactoryV2PermissionsDeployInscriptionFunctionality() (gas: 399293)
 Logs:
   0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
   deployInscription  msg.sender, address: 0x6CA6d1e2D5347Bfab1d91e883F1915560e09129D
 
-[PASS] testTokenFactoryV2PermissionsMintInscriptionFunctionality() (gas: 3000572)
+[PASS] testTokenFactoryV2PermissionsMintInscriptionFunctionality() (gas: 531583)
 Logs:
   0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
   deployInscription  msg.sender, address: 0x6CA6d1e2D5347Bfab1d91e883F1915560e09129D
 
-Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.86ms (1.38ms CPU time)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.67ms (1.01ms CPU time)
 
 Ran 2 tests for test/Counter.t.sol:CounterTest
-[PASS] testFuzz_SetNumber(uint256) (runs: 256, μ: 31132, ~: 31288)
+[PASS] testFuzz_SetNumber(uint256) (runs: 256, μ: 30977, ~: 31288)
 [PASS] test_Increment() (gas: 31303)
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 5.16ms (4.20ms CPU time)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 7.24ms (6.39ms CPU time)
 
-Ran 5 tests for test/TokenFactoryV1Test.sol:TokenFactoryV1Test
-[PASS] testTokenFactoryV1DeployInscriptionFunctionality() (gas: 2972857)
+Ran 7 tests for test/TokenFactoryV1Test.sol:TokenFactoryV1Test
+[PASS] testERC20Functionality() (gas: 2594456)
 Logs:
   0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
-  deployInscription newToken:  0x8d2C17FAd02B7bb64139109c6533b7C2b9CADb81
+  deployInscription newToken:  0x4f81992FCe2E1846dD528eC0102e6eE1f61ed3e2
 
-[PASS] testTokenFactoryV1MintInscriptionFunctionality() (gas: 3068046)
+[PASS] testTokenFactoryV1DeployInscriptionFunctionality() (gas: 2505868)
 Logs:
   0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
-  deployInscription newToken:  0x8d2C17FAd02B7bb64139109c6533b7C2b9CADb81
+  deployInscription newToken:  0x4f81992FCe2E1846dD528eC0102e6eE1f61ed3e2
 
-[PASS] testTokenFactoryV1PermissionsDeployInscriptionFunctionality() (gas: 2973252)
+[PASS] testTokenFactoryV1MintInscriptionFunctionality() (gas: 2601273)
 Logs:
   0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
-  deployInscription newToken:  0x8d2C17FAd02B7bb64139109c6533b7C2b9CADb81
+  deployInscription newToken:  0x4f81992FCe2E1846dD528eC0102e6eE1f61ed3e2
 
-[PASS] testTokenFactoryV1PermissionsMintInscriptionFunctionality() (gas: 3065556)
+[PASS] testTokenFactoryV1PermissionsDeployInscriptionFunctionality() (gas: 2506241)
 Logs:
   0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
-  deployInscription newToken:  0x8d2C17FAd02B7bb64139109c6533b7C2b9CADb81
+  deployInscription newToken:  0x4f81992FCe2E1846dD528eC0102e6eE1f61ed3e2
 
-[PASS] testUpgradeability() (gas: 6337394)
+[PASS] testTokenFactoryV1PermissionsMintInscriptionFunctionality() (gas: 2600351)
+Logs:
+  0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
+  deployInscription newToken:  0x4f81992FCe2E1846dD528eC0102e6eE1f61ed3e2
+
+[PASS] testUpgradeability() (gas: 3986417)
 Logs:
   0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
 
-Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 6.52s (6.52s CPU time)
+[PASS] testVerifyUpgradeability() (gas: 7102925)
+Logs:
+  0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
+  deployInscription newToken:  0x4f81992FCe2E1846dD528eC0102e6eE1f61ed3e2
+  Verify upgradeability
+  deployInscription  msg.sender, address: 0x6CA6d1e2D5347Bfab1d91e883F1915560e09129D
+  deployedTokenAddress 0x4f81992FCe2E1846dD528eC0102e6eE1f61ed3e2
+  deployedTokensLength 2
 
-Ran 4 test suites in 6.52s (6.53s CPU time): 12 tests passed, 0 failed, 0 skipped (12 total tests)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 3.43s (6.53s CPU time)
+
+Ran 4 test suites in 3.43s (3.44s CPU time): 14 tests passed, 0 failed, 0 skipped (14 total tests)

@@ -111,8 +111,8 @@ contract CounterTest is Test {
         address deployedTokenAddress = factoryv2.deployedTokens(0);
         ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
         vm.startPrank(user.addr);
-        vm.deal(user.addr, 1 ether);
-        factoryv2.mintInscription{value: price}(deployedTokenAddress);
+        vm.deal(user.addr, price * perMint);
+        factoryv2.mintInscription{value: price * perMint}(deployedTokenAddress);
         assertEq(deployedToken.balanceOf(user.addr), 10 ether);
         assertEq(deployedToken.totalSupply(), 10 ether);
         // Verify the total supply token
@@ -131,10 +131,11 @@ contract CounterTest is Test {
         address deployedTokenAddress = factoryv2.deployedTokens(0);
         ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
 
-        vm.deal(user.addr, 1 ether);
-        factoryv2.mintInscription{value: price}(deployedTokenAddress);
+        vm.deal(user.addr, price * perMint);
+        factoryv2.mintInscription{value: price * perMint}(deployedTokenAddress);
         assertEq(deployedToken.balanceOf(user.addr), 10 ether);
         assertEq(deployedToken.totalSupply(), 10 ether);
+        assertEq(factoryv2.tokenperMint(deployedTokenAddress), perMint);
         // Verify the total supply token
         assertEq(deployedToken.totalSupplyToken(), totalSupply);
         vm.stopPrank();

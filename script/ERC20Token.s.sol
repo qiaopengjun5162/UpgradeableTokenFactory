@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import {Script, console} from "forge-std/Script.sol";
 import {ERC20Token} from "../src/ERC20Token.sol";
 
-contract CounterScript is Script {
+contract ERC20TokenScript is Script {
     ERC20Token public token;
 
     function setUp() public {}
