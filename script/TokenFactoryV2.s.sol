@@ -19,21 +19,10 @@ contract TokenFactoryV2Script is Script {
         console.log("Deploying contracts with the account:", deployerAddress);
         vm.startBroadcast(deployerPrivateKey);
 
-        Upgrades.upgradeProxy(
-            address(proxy),
-            "TokenFactoryV2.sol:TokenFactoryV2",
-            "",
-            deployerAddress
-        );
-        (bool successful, ) = address(proxy).call(
-            abi.encodeWithSelector(
-                TokenFactoryV2.setTokenAddress.selector,
-                address(erc20Token)
-            )
-        );
+        Upgrades.upgradeProxy(address(proxy), "TokenFactoryV2.sol:TokenFactoryV2", "", deployerAddress);
+        (bool successful,) =
+            address(proxy).call(abi.encodeWithSelector(TokenFactoryV2.setTokenAddress.selector, address(erc20Token)));
         console.log("setTokenAddress success:", successful);
-
-        // console.log("TokenFactoryV1 deployed to:", address(factoryv2));
 
         vm.stopBroadcast();
     }

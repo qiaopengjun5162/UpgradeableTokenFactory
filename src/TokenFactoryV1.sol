@@ -23,9 +23,7 @@ contract TokenFactoryV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         __UUPSUpgradeable_init();
     }
 
-    function _authorizeUpgrade(
-        address newImplementation
-    ) internal override onlyOwner {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     /**
      * 该方法用来创建 ERC20 token，（模拟铭文的 deploy）
@@ -37,11 +35,7 @@ contract TokenFactoryV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * deployInscription(string symbol, uint totalSupply, uint perMint)
      *
      */
-    function deployInscription(
-        string memory symbol,
-        uint totalSupply,
-        uint perMint
-    ) public {
+    function deployInscription(string memory symbol, uint256 totalSupply, uint256 perMint) public {
         myToken = new ERC20Token();
         myToken.initialize(msg.sender, symbol, totalSupply, perMint);
         console.log("deployInscription newToken: ", address(myToken));
@@ -61,7 +55,7 @@ contract TokenFactoryV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         token.mint(msg.sender); // Assuming ERC20Token has a mint function with (address, uint256) parameters
     }
 
-    function size() public view returns (uint) {
+    function size() public view returns (uint256) {
         return deployedTokens.length;
     }
 }

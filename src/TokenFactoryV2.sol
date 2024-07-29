@@ -14,21 +14,13 @@ import "./ERC20Token.sol";
 contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     ERC20Token myToken;
     address[] public deployedTokens;
-    mapping(address => uint) public tokenPrices;
-    mapping(address => uint) public tokenperMint;
+    mapping(address => uint256) public tokenPrices;
+    mapping(address => uint256) public tokenperMint;
     mapping(address => address) public tokenDeployUser;
 
-    event deployInscriptionEvent(
-        address indexed tokenAddress,
-        address indexed userAddress,
-        uint indexed price
-    );
+    event deployInscriptionEvent(address indexed tokenAddress, address indexed userAddress, uint256 indexed price);
 
-    event mintInscriptionEvent(
-        address indexed tokenAddress,
-        address indexed userAddress,
-        uint indexed amount
-    );
+    event mintInscriptionEvent(address indexed tokenAddress, address indexed userAddress, uint256 indexed amount);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -44,9 +36,7 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         myToken = ERC20Token(_tokenAddress);
     }
 
-    function _authorizeUpgrade(
-        address newImplementation
-    ) internal override onlyOwner {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     /**
      * 部署新的 ERC20 代币合约
@@ -55,32 +45,19 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @param perMint perMint 用来控制每次发行的数量，用于控制mintInscription函数每次发行的数量
      * @param price 每个代币的价格 price 表示发行每个 token 需要支付的费用
      */
-    function deployInscription(
-        string memory symbol,
-        uint totalSupply,
-        uint perMint,
-        uint price
-    ) public {
+    function deployInscription(string memory symbol, uint256 totalSupply, uint256 perMint, uint256 price) public {
         require(bytes(symbol).length > 0, "Symbol cannot be empty");
         require(totalSupply > 0, "Total supply must be greater than zero");
         require(perMint > 0, "Per mint must be greater than zero");
         require(price > 0, "Price must be greater than zero");
 
-        require(
-            address(myToken) != address(0),
-            "Implementation address is not set"
-        );
+        require(address(myToken) != address(0), "Implementation address is not set");
 
         console.log("deployInscription  msg.sender, address:", msg.sender);
         // 使用 Clones 库创建最小代理合约实例
         address newToken = Clones.clone(address(myToken));
 
-        ERC20Token(newToken).initialize(
-            msg.sender,
-            symbol,
-            totalSupply,
-            perMint
-        );
+        ERC20Token(newToken).initialize(msg.sender, symbol, totalSupply, perMint);
 
         deployedTokens.push(newToken);
         tokenPrices[newToken] = price;
@@ -95,13 +72,13 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      */
     function mintInscription(address tokenAddr) public payable {
         ERC20Token token = ERC20Token(tokenAddr);
-        uint price = tokenPrices[tokenAddr];
-        uint perMint = tokenperMint[tokenAddr];
+        uint256 price = tokenPrices[tokenAddr];
+        uint256 perMint = tokenperMint[tokenAddr];
         address userAddr = tokenDeployUser[tokenAddr];
         require(msg.value >= (price * perMint), "Incorrect payment");
         token.mint(msg.sender);
         // 使用 call 方法转账，以避免 gas 限制问题 payable(userAddr).transfer(msg.value);
-        (bool success, ) = userAddr.call{value: msg.value}("");
+        (bool success,) = userAddr.call{value: msg.value}("");
         require(success, "Transfer failed.");
 
         emit mintInscriptionEvent(tokenAddr, userAddr, msg.value);
@@ -111,12 +88,12 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * 提取合约余额
      */
     function withdraw() external onlyOwner {
-        uint balance = address(this).balance;
+        uint256 balance = address(this).balance;
         require(balance > 0, "No funds to withdraw");
         payable(owner()).transfer(balance);
     }
 
-    function size() public view returns (uint) {
+    function size() public view returns (uint256) {
         return deployedTokens.length;
     }
 }

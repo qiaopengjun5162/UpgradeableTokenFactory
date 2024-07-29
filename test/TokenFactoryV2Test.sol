@@ -21,9 +21,9 @@ contract CounterTest is Test {
     Account public user = makeAccount("user");
 
     string public symbol = "ETK";
-    uint public totalSupply = 1_000_000 ether;
-    uint public perMint = 10 ether;
-    uint public price = 10 ** 16; // 0.01 ETH in wei
+    uint256 public totalSupply = 1_000_000 ether;
+    uint256 public perMint = 10 ether;
+    uint256 public price = 10 ** 16; // 0.01 ETH in wei
     address public tokenAddr;
 
     function setUp() public {
@@ -32,21 +32,14 @@ contract CounterTest is Test {
 
         TokenFactoryV2 implementationV2 = new TokenFactoryV2();
         vm.prank(owner.addr);
-        proxy = new ERC1967Proxy(
-            address(implementationV2),
-            abi.encodeCall(implementationV2.initialize, (owner.addr))
-        );
+        proxy = new ERC1967Proxy(address(implementationV2), abi.encodeCall(implementationV2.initialize, (owner.addr)));
 
         // 用代理关联 TokenFactoryV2 接口
         factoryv2 = TokenFactoryV2(address(proxy));
 
         vm.prank(owner.addr);
-        (bool success, ) = address(proxy).call(
-            abi.encodeWithSelector(
-                factoryv2.setTokenAddress.selector,
-                address(myToken)
-            )
-        );
+        (bool success,) =
+            address(proxy).call(abi.encodeWithSelector(factoryv2.setTokenAddress.selector, address(myToken)));
 
         require(success);
 
@@ -77,9 +70,7 @@ contract CounterTest is Test {
         vm.stopPrank();
     }
 
-    function testTokenFactoryV2PermissionsDeployInscriptionFunctionality()
-        public
-    {
+    function testTokenFactoryV2PermissionsDeployInscriptionFunctionality() public {
         vm.startPrank(user.addr);
         factoryv2.deployInscription(symbol, totalSupply, perMint, price);
 
@@ -120,9 +111,7 @@ contract CounterTest is Test {
         vm.stopPrank();
     }
 
-    function testTokenFactoryV2PermissionsMintInscriptionFunctionality()
-        public
-    {
+    function testTokenFactoryV2PermissionsMintInscriptionFunctionality() public {
         vm.startPrank(user.addr);
         factoryv2.deployInscription(symbol, totalSupply, perMint, price);
 

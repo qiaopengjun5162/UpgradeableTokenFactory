@@ -20,10 +20,7 @@ contract DeployUUPSProxy is Script {
         console.log("TokenFactoryV1 deployed to:", address(_implementation));
 
         // Encode the initializer function call
-        bytes memory data = abi.encodeCall(
-            _implementation.initialize,
-            deployerAddress
-        );
+        bytes memory data = abi.encodeCall(_implementation.initialize, deployerAddress);
 
         // Deploy the proxy contract with the implementation address and initializer
         ERC1967Proxy proxy = new ERC1967Proxy(address(_implementation), data);

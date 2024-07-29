@@ -14,8 +14,8 @@ contract ERC20TokenTest is Test {
     Account public newOwner = makeAccount("newOwner");
     Account public user = makeAccount("user");
     string public symbol = "ETK";
-    uint public totalSupply = 1_000_000 ether;
-    uint public perMint = 10 ether;
+    uint256 public totalSupply = 1_000_000 ether;
+    uint256 public perMint = 10 ether;
 
     function setUp() public {
         // 部署实现
@@ -23,10 +23,7 @@ contract ERC20TokenTest is Test {
         // Deploy the proxy and initialize the contract through the proxy
         proxy = new ERC1967Proxy(
             address(implementation),
-            abi.encodeCall(
-                implementation.initialize,
-                (owner.addr, symbol, totalSupply, perMint)
-            )
+            abi.encodeCall(implementation.initialize, (owner.addr, symbol, totalSupply, perMint))
         );
         // 用代理关联 MyToken 接口
         myToken = ERC20Token(address(proxy));

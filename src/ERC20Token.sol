@@ -21,8 +21,8 @@ contract ERC20Token is
     ERC20PermitUpgradeable,
     ERC20VotesUpgradeable
 {
-    uint public totalSupplyToken;
-    uint public perMint;
+    uint256 public totalSupplyToken;
+    uint256 public perMint;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -37,12 +37,10 @@ contract ERC20Token is
      * @param _perMint perMint 用来控制每次发行的数量
      *
      */
-    function initialize(
-        address initialOwner,
-        string memory _symbol,
-        uint _totalSupply,
-        uint _perMint
-    ) public initializer {
+    function initialize(address initialOwner, string memory _symbol, uint256 _totalSupply, uint256 _perMint)
+        public
+        initializer
+    {
         __ERC20_init("ERC20Token", _symbol);
         __ERC20Burnable_init();
         __ERC20Pausable_init();
@@ -62,40 +60,22 @@ contract ERC20Token is
     }
 
     function mint(address to) public {
-        uint currentSupply = totalSupply(); // 获取当前代币供应量
+        uint256 currentSupply = totalSupply(); // 获取当前代币供应量
         // 确保铸造后总供应量不超过最大供应量
-        require(
-            currentSupply + perMint <= totalSupplyToken,
-            "Exceeds max total supply"
-        );
+        require(currentSupply + perMint <= totalSupplyToken, "Exceeds max total supply");
         _mint(to, perMint);
     }
 
     // The following functions are overrides required by Solidity.
 
-    function _update(
-        address from,
-        address to,
-        uint256 value
-    )
+    function _update(address from, address to, uint256 value)
         internal
-        override(
-            ERC20Upgradeable,
-            ERC20PausableUpgradeable,
-            ERC20VotesUpgradeable
-        )
+        override(ERC20Upgradeable, ERC20PausableUpgradeable, ERC20VotesUpgradeable)
     {
         super._update(from, to, value);
     }
 
-    function nonces(
-        address owner
-    )
-        public
-        view
-        override(ERC20PermitUpgradeable, NoncesUpgradeable)
-        returns (uint256)
-    {
+    function nonces(address owner) public view override(ERC20PermitUpgradeable, NoncesUpgradeable) returns (uint256) {
         return super.nonces(owner);
     }
 }
