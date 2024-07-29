@@ -6,9 +6,24 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
 import {TokenFactoryV2} from "../src/TokenFactoryV2.sol";
 import {ERC20Token} from "../src/ERC20Token.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+
+contract MyToken is ERC20, Ownable, ERC20Permit {
+    constructor(
+        address initialOwner
+    ) ERC20("MyToken", "MTK") Ownable(initialOwner) ERC20Permit("MyToken") {}
+
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
+}
 
 contract CounterTest is Test {
     TokenFactoryV2 public factoryv2;
+    MyToken public erc20Token;
     ERC20Token public myToken;
     ERC1967Proxy proxy;
     ERC1967Proxy proxy2;
@@ -19,15 +34,42 @@ contract CounterTest is Test {
     uint public totalSupply = 1_000_000 ether;
     uint public perMint = 10 ether;
     uint public price = 10 ** 16; // 0.01 ETH in wei
+    address public tokenAddr;
 
     function setUp() public {
+        erc20Token = new MyToken(owner.addr);
+        // myToken.initialize(owner.addr, symbol, totalSupply, perMint);
+        // Deploy the proxy and initialize the contract through the proxy
+        // proxy = new ERC1967Proxy(
+        //     address(implementation),
+        //     abi.encodeCall(
+        //         implementation.initialize,
+        //         (owner.addr, symbol, totalSupply, perMint)
+        //     )
+        // );
+        // 用代理关联 MyToken 接口
+        // myToken = ERC20Token(address(proxy));
+
         TokenFactoryV2 implementationV2 = new TokenFactoryV2();
+        vm.prank(owner.addr);
         proxy = new ERC1967Proxy(
             address(implementationV2),
             abi.encodeCall(implementationV2.initialize, (owner.addr))
         );
+
         // 用代理关联 TokenFactoryV2 接口
-        factoryv2 = TokenFactoryV2(address(proxy));
+        // factoryv2 = TokenFactoryV2(address(proxy));
+
+        vm.prank(owner.addr);
+        (bool _success, bytes memory returnData) = address(proxy).call(
+            abi.encodeWithSelector(
+                factoryv2.setLibraryAddress.selector,
+                address(erc20Token)
+            )
+        );
+        console.log(_success, "Success");
+        require(_success);
+        // tokenAddr = abi.decode(returnData, (address));
         // Emit the owner address for debugging purposes
         emit log_address(owner.addr);
     }
@@ -55,6 +97,31 @@ contract CounterTest is Test {
         vm.stopPrank();
     }
 
+    function testTokenFactoryV2PermissionsDeployInscriptionFunctionality()
+        public
+    {
+        vm.startPrank(user.addr);
+        factoryv2.deployInscription(symbol, totalSupply, perMint, price);
+
+        assertEq(factoryv2.size(), 1);
+
+        // Fetch the deployed token address
+        address deployedTokenAddress = factoryv2.deployedTokens(0);
+        assertEq(factoryv2.tokenPrices(deployedTokenAddress), price);
+        // Create an instance of the deployed token contract
+        ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
+        assertEq(address(deployedToken), deployedTokenAddress);
+        // Verify token initialization
+        assertEq(deployedToken.symbol(), symbol);
+        assertEq(deployedToken.balanceOf(owner.addr), 0);
+        assertEq(deployedToken.totalSupplyToken(), totalSupply);
+        assertEq(deployedToken.perMint(), perMint);
+
+        // Optionally verify owner initialization
+        assertEq(deployedToken.owner(), user.addr);
+        vm.stopPrank();
+    }
+
     function testTokenFactoryV2MintInscriptionFunctionality() public {
         vm.prank(owner.addr);
         factoryv2.deployInscription(symbol, totalSupply, perMint, price);
@@ -64,6 +131,26 @@ contract CounterTest is Test {
         address deployedTokenAddress = factoryv2.deployedTokens(0);
         ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
         vm.startPrank(user.addr);
+        vm.deal(user.addr, 1 ether);
+        factoryv2.mintInscription{value: price}(deployedTokenAddress);
+        assertEq(deployedToken.balanceOf(user.addr), 10 ether);
+        assertEq(deployedToken.totalSupply(), 10 ether);
+        // Verify the total supply token
+        assertEq(deployedToken.totalSupplyToken(), totalSupply);
+        vm.stopPrank();
+    }
+
+    function testTokenFactoryV2PermissionsMintInscriptionFunctionality()
+        public
+    {
+        vm.startPrank(user.addr);
+        factoryv2.deployInscription(symbol, totalSupply, perMint, price);
+
+        assertEq(factoryv2.size(), 1);
+        // Fetch the deployed token address
+        address deployedTokenAddress = factoryv2.deployedTokens(0);
+        ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
+
         vm.deal(user.addr, 1 ether);
         factoryv2.mintInscription{value: price}(deployedTokenAddress);
         assertEq(deployedToken.balanceOf(user.addr), 10 ether);

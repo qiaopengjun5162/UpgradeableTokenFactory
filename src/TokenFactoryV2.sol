@@ -7,11 +7,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
+// import "@optionality.io/clone-factory/contracts/CloneFactory.sol";
 import "./ERC20Token.sol";
 
 /// @custom:oz-upgrades-from TokenFactoryV1
 contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
-    ERC20Token myToken;
+    address myToken;
     ERC1967Proxy proxy;
     address[] public deployedTokens;
     mapping(address => uint) public tokenPrices;
@@ -24,6 +25,10 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     function initialize(address initialOwner) public initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
+    }
+
+    function setLibraryAddress(address _libraryAddress) public onlyOwner {
+        myToken = _libraryAddress;
     }
 
     function _authorizeUpgrade(
@@ -42,21 +47,30 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         uint totalSupply,
         uint perMint,
         uint price
-    ) public onlyOwner {
+    ) public {
+        // require(
+        //     implementation != address(0),
+        //     "Implementation address is not set"
+        // );
+
         // 部署实现
-        ERC20Token implementation = new ERC20Token();
+        // ERC20Token implementation = new ERC20Token();
+
         console.log("deployInscription  msg.sender, address:", msg.sender);
         // 使用 Clones 库创建最小代理合约实例
-        address proxyInstance = Clones.clone(address(implementation));
-        ERC20Token(proxyInstance).initialize(
+        // address proxyInstance = Clones.clone(address(implementation));
+        address newToken = Clones.clone(myToken);
+        // address proxyInstance = createClone(implementation);
+
+        ERC20Token(newToken).initialize(
             msg.sender,
             symbol,
             totalSupply,
             perMint
         );
 
-        deployedTokens.push(proxyInstance);
-        tokenPrices[proxyInstance] = price;
+        deployedTokens.push(newToken);
+        tokenPrices[newToken] = price;
     }
 
     /**
@@ -68,6 +82,17 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         uint price = tokenPrices[tokenAddr];
         require(msg.value >= price, "Incorrect payment");
         token.mint(msg.sender);
+        // 将支付的以太币转账到合约所有者
+        payable(owner()).transfer(msg.value);
+    }
+
+    /**
+     * 提取合约余额
+     */
+    function withdraw() external onlyOwner {
+        uint balance = address(this).balance;
+        require(balance > 0, "No funds to withdraw");
+        payable(owner()).transfer(balance);
     }
 
     function size() public view returns (uint) {

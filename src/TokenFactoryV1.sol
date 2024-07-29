@@ -42,7 +42,7 @@ contract TokenFactoryV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         string memory symbol,
         uint totalSupply,
         uint perMint
-    ) public onlyOwner {
+    ) public {
         // 部署实现
         ERC20Token implementation = new ERC20Token();
         // Deploy the proxy and initialize the contract through the proxy

@@ -58,6 +58,30 @@ contract TokenFactoryV1Test is Test {
         assertEq(deployedToken.owner(), owner.addr);
     }
 
+    function testTokenFactoryV1PermissionsDeployInscriptionFunctionality()
+        public
+    {
+        vm.startPrank(user.addr);
+        factoryv1.deployInscription(symbol, totalSupply, perMint);
+
+        assertEq(factoryv1.size(), 1);
+        // Fetch the deployed token address
+        address deployedTokenAddress = factoryv1.deployedTokens(0);
+
+        // Create an instance of the deployed token contract
+        ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
+
+        // Verify token initialization
+        assertEq(deployedToken.symbol(), symbol);
+        assertEq(deployedToken.totalSupply(), 0);
+        assertEq(deployedToken.totalSupplyToken(), totalSupply);
+        assertEq(deployedToken.perMint(), perMint);
+
+        // Optionally verify owner initialization
+        assertEq(deployedToken.owner(), user.addr);
+        vm.stopPrank();
+    }
+
     function testTokenFactoryV1MintInscriptionFunctionality() public {
         vm.prank(owner.addr);
         factoryv1.deployInscription(symbol, totalSupply, perMint);
@@ -68,6 +92,28 @@ contract TokenFactoryV1Test is Test {
         ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
         vm.startPrank(user.addr);
         factoryv1.mintInscription(deployedTokenAddress);
+        assertEq(deployedToken.balanceOf(user.addr), 10 ether);
+        assertEq(deployedToken.totalSupply(), 10 ether);
+        assertEq(deployedToken.totalSupplyToken(), totalSupply);
+        vm.stopPrank();
+    }
+
+    function testTokenFactoryV1PermissionsMintInscriptionFunctionality()
+        public
+    {
+        vm.startPrank(user.addr);
+        factoryv1.deployInscription(symbol, totalSupply, perMint);
+
+        assertEq(factoryv1.size(), 1);
+        // Fetch the deployed token address
+        address deployedTokenAddress = factoryv1.deployedTokens(0);
+        ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
+
+        factoryv1.mintInscription(deployedTokenAddress);
+        assertEq(
+            ERC20Token(deployedTokenAddress).balanceOf(user.addr),
+            10 ether
+        );
         assertEq(deployedToken.balanceOf(user.addr), 10 ether);
         assertEq(deployedToken.totalSupply(), 10 ether);
         assertEq(deployedToken.totalSupplyToken(), totalSupply);

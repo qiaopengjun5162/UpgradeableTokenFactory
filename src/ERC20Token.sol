@@ -19,8 +19,7 @@ contract ERC20Token is
     ERC20PausableUpgradeable,
     OwnableUpgradeable,
     ERC20PermitUpgradeable,
-    ERC20VotesUpgradeable,
-    UUPSUpgradeable
+    ERC20VotesUpgradeable
 {
     uint public totalSupplyToken;
     uint public perMint;
@@ -50,7 +49,6 @@ contract ERC20Token is
         __Ownable_init(initialOwner);
         __ERC20Permit_init("ERC20Token");
         __ERC20Votes_init();
-        __UUPSUpgradeable_init();
         perMint = _perMint;
         totalSupplyToken = _totalSupply;
     }
@@ -72,10 +70,6 @@ contract ERC20Token is
         );
         _mint(to, perMint);
     }
-
-    function _authorizeUpgrade(
-        address newImplementation
-    ) internal override onlyOwner {}
 
     // The following functions are overrides required by Solidity.
 
