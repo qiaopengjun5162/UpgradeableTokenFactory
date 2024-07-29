@@ -129,4 +129,6 @@ contract TokenFactoryV1Test is Test {
             owner.addr
         );
     }
+
+    function testV1Upgradeability() public {}
 }

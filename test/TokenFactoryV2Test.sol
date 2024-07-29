@@ -11,19 +11,9 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
-contract MyToken is ERC20, Ownable, ERC20Permit {
-    constructor(
-        address initialOwner
-    ) ERC20("MyToken", "MTK") Ownable(initialOwner) ERC20Permit("MyToken") {}
-
-    function mint(address to, uint256 amount) public onlyOwner {
-        _mint(to, amount);
-    }
-}
-
 contract CounterTest is Test {
     TokenFactoryV2 public factoryv2;
-    MyToken public erc20Token;
+
     ERC20Token public myToken;
     ERC1967Proxy proxy;
     ERC1967Proxy proxy2;
@@ -37,18 +27,8 @@ contract CounterTest is Test {
     address public tokenAddr;
 
     function setUp() public {
-        erc20Token = new MyToken(owner.addr);
-        // myToken.initialize(owner.addr, symbol, totalSupply, perMint);
-        // Deploy the proxy and initialize the contract through the proxy
-        // proxy = new ERC1967Proxy(
-        //     address(implementation),
-        //     abi.encodeCall(
-        //         implementation.initialize,
-        //         (owner.addr, symbol, totalSupply, perMint)
-        //     )
-        // );
-        // 用代理关联 MyToken 接口
-        // myToken = ERC20Token(address(proxy));
+        myToken = new ERC20Token();
+        myToken.initialize(msg.sender, symbol, totalSupply, perMint);
 
         TokenFactoryV2 implementationV2 = new TokenFactoryV2();
         vm.prank(owner.addr);
@@ -58,18 +38,18 @@ contract CounterTest is Test {
         );
 
         // 用代理关联 TokenFactoryV2 接口
-        // factoryv2 = TokenFactoryV2(address(proxy));
+        factoryv2 = TokenFactoryV2(address(proxy));
 
         vm.prank(owner.addr);
-        (bool _success, bytes memory returnData) = address(proxy).call(
+        (bool success, ) = address(proxy).call(
             abi.encodeWithSelector(
                 factoryv2.setLibraryAddress.selector,
-                address(erc20Token)
+                address(myToken)
             )
         );
-        console.log(_success, "Success");
-        require(_success);
-        // tokenAddr = abi.decode(returnData, (address));
+
+        require(success);
+
         // Emit the owner address for debugging purposes
         emit log_address(owner.addr);
     }
