@@ -13,6 +13,7 @@ contract TokenFactoryV1Test is Test {
     TokenFactoryV1 public factoryv1;
     TokenFactoryV2 public factoryv2;
     ERC20Token public myToken;
+    ERC20Token deployedToken;
 
     ERC1967Proxy proxy;
     Account public owner = makeAccount("owner");
@@ -22,8 +23,11 @@ contract TokenFactoryV1Test is Test {
     string public symbol = "ETK";
     uint public totalSupply = 1_000_000 ether;
     uint public perMint = 10 ether;
+    uint public price = 10 ** 16; // 0.01 ETH in wei
 
     function setUp() public {
+        myToken = new ERC20Token();
+        myToken.initialize(msg.sender, symbol, totalSupply, perMint);
         // 部署实现
         TokenFactoryV1 implementation = new TokenFactoryV1();
         // Deploy the proxy and initialize the contract through the proxy
@@ -46,7 +50,7 @@ contract TokenFactoryV1Test is Test {
         address deployedTokenAddress = factoryv1.deployedTokens(0);
 
         // Create an instance of the deployed token contract
-        ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
+        deployedToken = ERC20Token(deployedTokenAddress);
 
         // Verify token initialization
         assertEq(deployedToken.symbol(), symbol);
@@ -69,7 +73,7 @@ contract TokenFactoryV1Test is Test {
         address deployedTokenAddress = factoryv1.deployedTokens(0);
 
         // Create an instance of the deployed token contract
-        ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
+        deployedToken = ERC20Token(deployedTokenAddress);
 
         // Verify token initialization
         assertEq(deployedToken.symbol(), symbol);
@@ -89,7 +93,7 @@ contract TokenFactoryV1Test is Test {
         assertEq(factoryv1.size(), 1);
         // Fetch the deployed token address
         address deployedTokenAddress = factoryv1.deployedTokens(0);
-        ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
+        deployedToken = ERC20Token(deployedTokenAddress);
         vm.startPrank(user.addr);
         factoryv1.mintInscription(deployedTokenAddress);
         assertEq(deployedToken.balanceOf(user.addr), 10 ether);
@@ -107,7 +111,7 @@ contract TokenFactoryV1Test is Test {
         assertEq(factoryv1.size(), 1);
         // Fetch the deployed token address
         address deployedTokenAddress = factoryv1.deployedTokens(0);
-        ERC20Token deployedToken = ERC20Token(deployedTokenAddress);
+        deployedToken = ERC20Token(deployedTokenAddress);
 
         factoryv1.mintInscription(deployedTokenAddress);
         assertEq(
@@ -130,5 +134,100 @@ contract TokenFactoryV1Test is Test {
         );
     }
 
-    function testV1Upgradeability() public {}
+    function testERC20Functionality() public {
+        vm.startPrank(user.addr);
+        factoryv1.deployInscription(symbol, totalSupply, perMint);
+        address deployedTokenAddress = factoryv1.deployedTokens(0);
+        deployedToken = ERC20Token(deployedTokenAddress);
+
+        factoryv1.mintInscription(deployedTokenAddress);
+        vm.stopPrank();
+        assertEq(deployedToken.balanceOf(user.addr), perMint);
+    }
+
+    function testVerifyUpgradeability() public {
+        testERC20Functionality();
+        vm.prank(owner.addr);
+        // TokenFactoryV2 factoryV2 = new TokenFactoryV2();
+        assertEq(deployedToken.balanceOf(user.addr), perMint); ///
+        // 升级代理合约
+        Upgrades.upgradeProxy(
+            address(proxy),
+            "TokenFactoryV2.sol:TokenFactoryV2",
+            "",
+            owner.addr
+        );
+        // TokenFactoryV2 factoryV2 = TokenFactoryV2(address(proxy));
+        factoryv2 = TokenFactoryV2(address(proxy));
+        console.log("Verify upgradeability");
+        vm.prank(owner.addr);
+        (bool s, ) = address(proxy).call(
+            abi.encodeWithSignature(
+                "setTokenAddress(address)",
+                address(myToken)
+            )
+        );
+        require(s);
+
+        // 验证新的功能
+        vm.startPrank(user.addr);
+        deal(user.addr, price);
+        (bool success, ) = address(proxy).call(
+            abi.encodeWithSelector(
+                factoryv2.deployInscription.selector,
+                symbol,
+                totalSupply,
+                perMint,
+                price
+            )
+        );
+        assertEq(success, true);
+
+        (bool su, bytes memory deployedTokenAddressBytes) = address(proxy).call(
+            abi.encodeWithSelector(factoryv2.deployedTokens.selector, 0)
+        );
+        assertEq(su, true);
+        address deployedTokenAddress = abi.decode(
+            deployedTokenAddressBytes,
+            (address)
+        );
+
+        console.log("deployedTokenAddress", deployedTokenAddress);
+        (bool sus, bytes memory deployedTokensLengthBytes) = address(proxy)
+            .call(abi.encodeWithSelector(factoryv2.size.selector));
+        assertEq(sus, true);
+        uint256 deployedTokensLength = abi.decode(
+            deployedTokensLengthBytes,
+            (uint256)
+        );
+        console.log("deployedTokensLength", deployedTokensLength);
+        assertEq(deployedTokensLength, 2);
+
+        (bool su2, bytes memory deployedTokenAddressBytes2) = address(proxy)
+            .call(abi.encodeWithSelector(factoryv2.deployedTokens.selector, 1));
+        assertEq(su2, true);
+        address deployedTokenAddress2 = abi.decode(
+            deployedTokenAddressBytes2,
+            (address)
+        );
+
+        assertNotEq(deployedTokenAddress, deployedTokenAddress2);
+
+        deployedToken = ERC20Token(deployedTokenAddress2);
+        (bool mintSuccess, ) = address(proxy).call{value: price}(
+            abi.encodeWithSignature(
+                "mintInscription(address)",
+                deployedTokenAddress2
+            )
+        );
+        require(mintSuccess, "Minting of token failed");
+
+        assertEq(factoryv2.tokenPrices(deployedTokenAddress), 0);
+        assertEq(factoryv2.tokenPrices(deployedTokenAddress2), price);
+
+        assertEq(deployedToken.balanceOf(user.addr), 10 ether);
+        assertEq(deployedToken.totalSupply(), perMint);
+        assertEq(deployedToken.totalSupplyToken(), totalSupply);
+        vm.stopPrank();
+    }
 }

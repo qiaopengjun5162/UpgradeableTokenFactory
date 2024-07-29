@@ -12,7 +12,7 @@ import "./ERC20Token.sol";
 
 /// @custom:oz-upgrades-from TokenFactoryV1
 contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
-    address myToken;
+    ERC20Token myToken;
     ERC1967Proxy proxy;
     address[] public deployedTokens;
     mapping(address => uint) public tokenPrices;
@@ -27,8 +27,8 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         __UUPSUpgradeable_init();
     }
 
-    function setLibraryAddress(address _libraryAddress) public onlyOwner {
-        myToken = _libraryAddress;
+    function setTokenAddress(address _tokenAddress) public onlyOwner {
+        myToken = ERC20Token(_tokenAddress);
     }
 
     function _authorizeUpgrade(
@@ -59,7 +59,7 @@ contract TokenFactoryV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         console.log("deployInscription  msg.sender, address:", msg.sender);
         // 使用 Clones 库创建最小代理合约实例
         // address proxyInstance = Clones.clone(address(implementation));
-        address newToken = Clones.clone(myToken);
+        address newToken = Clones.clone(address(myToken));
         // address proxyInstance = createClone(implementation);
 
         ERC20Token(newToken).initialize(

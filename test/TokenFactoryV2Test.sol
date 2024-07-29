@@ -43,7 +43,7 @@ contract CounterTest is Test {
         vm.prank(owner.addr);
         (bool success, ) = address(proxy).call(
             abi.encodeWithSelector(
-                factoryv2.setLibraryAddress.selector,
+                factoryv2.setTokenAddress.selector,
                 address(myToken)
             )
         );
